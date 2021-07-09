@@ -7,8 +7,8 @@
   - [1.4. Java虚拟机家族](#14-java%e8%99%9a%e6%8b%9f%e6%9c%ba%e5%ae%b6%e6%97%8f)
   - [1.5. 展望Java技术的未来](#15-%e5%b1%95%e6%9c%9bjava%e6%8a%80%e6%9c%af%e7%9a%84%e6%9c%aa%e6%9d%a5)
     - [1.5.1. 无语言倾向](#151-%e6%97%a0%e8%af%ad%e8%a8%80%e5%80%be%e5%90%91)
-    - [1.5.2. 新一代及时编译器](#152-%e6%96%b0%e4%b8%80%e4%bb%a3%e5%8f%8a%e6%97%b6%e7%bc%96%e8%af%91%e5%99%a8)
-    - [1.5.3. 向Graal Native迈进](#153-%e5%90%91graal-native%e8%bf%88%e8%bf%9b)
+    - [1.5.2. 新一代即时编译器](#152-%e6%96%b0%e4%b8%80%e4%bb%a3%e5%8d%b3%e6%97%b6%e7%bc%96%e8%af%91%e5%99%a8)
+    - [1.5.3. 向Native迈进](#153-%e5%90%91native%e8%bf%88%e8%bf%9b)
 
 <!-- /TOC -->
 
@@ -16,9 +16,9 @@
 
 ## 1.1. 概述
 
-一次编写，到处运行
+一次编写，到处运行: Write Once Run Anywhere
 
-内存管理
+自动内存管理
 
 热点代码检测和运行时编译优化，Java程序随着运行时间的增长而获得更高的性能
 
@@ -26,7 +26,7 @@
 
 JDK = Java程序设计语言 + Java虚拟机 + Java类库
 
-JRE = Java虚拟机 + Java SE API子集
+JRE = Java虚拟机 + Java类库中的Java SE API子集
 
 ## 1.3. Java发展史
 
@@ -54,7 +54,7 @@ Sun Classic/Exact VM: 虚拟机始祖，精确内存管理
 
 HotSpot VM是OracleJDK和OpenJDK中的默认虚拟机, 热点代码探测
 
-Google Android Dalvik VM: Android的核心组件，使用寄存器架构而不是栈架构，不过在Android4.4中ART虚拟机支持提前编译，取代了Dalvik虚拟机
+Google Android Dalvik VM: Android的核心组件，使用寄存器架构而不是栈架构，不过在Android4.4中ART虚拟机支持提前编译，取代了Dalvik虚拟机, Android 5 ART就变为了默认虚拟机
 
 ## 1.5. 展望Java技术的未来
 
@@ -67,15 +67,15 @@ Google Android Dalvik VM: Android的核心组件，使用寄存器架构而不�
 Graal VM基本原理是将语言源代码(Javascript)或者中间代码格式(LLVM字节码)通过解释器转换为Graal VM的中间表示(IR)
 
 
-### 1.5.2. 新一代及时编译器
+### 1.5.2. 新一代即时编译器
 
 长时间运行的应用经过充分预热，热点代码会被HotSpot探测定位，将其直接编译为物理硬件可直接执行的机器码，JIT编译
 
-JDK10中加入了全新的Graal编译器，代替了服务器端编译器C2，Graal编译器使用Java编写而不是像C2使用C++编写
+JDK10中加入了全新的即时编译器Graal Compiler，代替了服务器端编译器C2（HotSpot Server Compiler），Graal编译器使用Java编写而不是像C2使用C++编写
 
-Graal编译器的开发效率和扩展性等追平C2，甚至部分反超C2编译器，但是仍然带着"实验状态"的标签，需要用开关参数来启用Graal编译器
+Graal编译器的开发效率和扩展性几乎可以追平C2，甚至部分反超C2编译器，但是目前仍然带着"实验状态"的标签，需要用开关参数来启用Graal编译器
 
-### 1.5.3. 向Graal Native迈进
+### 1.5.3. 向Native迈进
 
 Java启动时间较长，并且需要预热才能得到更高的性能, 和微服务以及无服务(AWS Lambda允许的最长运行时间为15分钟）相悖
 
@@ -83,7 +83,7 @@ Java启动时间较长，并且需要预热才能得到更高的性能, 和微�
 
 提前编译是将部分bytecode直接预编译为二进制代码，减少JIT的预热时间，但是破坏了Java的Write Once Run Anywhere的原则
 
-Substrate VM是Graal VM 0.20版本的极小型运行时环境，包括许多独立的机制，进行提前编译AOT, 显著降低内存占用和启动时间
+Substrate VM是Graal VM 0.20版本中的极小型运行时环境，包括许多独立的机制，进行提前编译AOT, 显著降低内存占用和启动时间，但相应地，原理上也决定了Substrate VM必须要求目标程序是完全封闭的，即不能动态加载其他编译期不可知的代码和类库。基于这个假设，Substrate VM才能探索整个编译空间，并通过静态分析推算出所有虚方法调用的目标方法。
 
 
 
