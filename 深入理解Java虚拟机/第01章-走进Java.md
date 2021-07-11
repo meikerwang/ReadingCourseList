@@ -95,11 +95,21 @@ HotSpot编译时指定一系列特性开关，反应在源代码阶段不只是�
 
 ## 1.6. 实战：自己编译JDK
 
+本机Mac环境
+```
+MacBook Pro (16-inch, 2019)
+处理器 2.6 GHz 六核Intel Core i7
+内存 16 GB
+macOS 11.4
+```
+
 下载源码和 Bootstrap JDK
 
 ```shell
 # 安装Command Line Tools
 xcode-select --install
+# 安装Xcode
+# 在App Store安装
 # 下载openjdk12源代码
 https://hg.openjdk.java.net/jdk/jdk12/
 # 国内网速较慢可以在github下载
@@ -119,3 +129,34 @@ brew install ccache
 brew install freetype
 brew install autoconf
 ```
+
+编译
+```bash
+# 自动检测依赖
+$ bash ./configure
+# 报错,需要设置xcode路径
+$ sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+# 可选编译选项, --disable-warnings-as-errors: 防止编译过程中的warning也会中断编译的进程
+# --with-boot-jdk：指定Bootstrap JDK路径
+# --with-debug-level：编译级别,可选值为release、fastdebug、slowdebug和optimized,默认值为release,如果我们要调试的话,需要设定为fastdebug或者slowdebug,建议设置为slowdebug
+# --with-target-bits：指定编译32位还是64位的虚拟机
+# --disable-warnings-as-errors：避免因为警告而导致编译过程中断
+# --enable-dtrace：开启一个性能工具
+# --with-jvm-variants：编译特定模式下的虚拟机,一般这里编译server模式
+# --with-conf-name：指定编译配置的名称,如果没有指定,则会生成默认的配置名称macosx-x86_64-server-slowdebug,我这里采用默认生成配置
+# --enable-ccache参数来通过ccache加快编译速度,但目前编译速度其实不慢,并且增加这个参数后续导入到CLion会出现很多红字提示
+$ bash configure --with-debug-level=slowdebug --enable-dtrace --with-jvm-variants=server --with-target-bits=64 --with-num-cores=8 --with-memory-size=8000  --disable-warnings-as-errors
+# 生成Compilation Database,并且在openjdk12/build/macosx-x86_64-server-slowdebug生产配置文件compile_commands.json
+$ make CONF=macosx-x86_64-server-slowdebug compile-commands # time 2:03
+# 编译
+$ make CONF=macosx-x86_64-server-slowdebug # time 4:33
+# 验证
+$ ./build/macosx-x86_64-server-slowdebug/jdk/bin/java -version
+openjdk version "12-internal" 2019-03-19
+OpenJDK Runtime Environment (slowdebug build 12-internal+0-adhoc.wangzhi07.openjdk12)
+OpenJDK 64-Bit Server VM (slowdebug build 12-internal+0-adhoc.wangzhi07.openjdk12, mixed mode)
+```
+
+
+参考文档:
+- https://juejin.cn/post/6854573216665436173
